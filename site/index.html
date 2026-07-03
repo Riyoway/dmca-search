@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DMCA Notice Search</title>
+  <meta name="description" content="Search GitHub's public archive of DMCA takedown notices, counter notices, retractions and reversals.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='1' y='13' font-size='14' font-family='serif'%3E%C2%A7%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <p class="kicker">github/dmca &middot; public takedown archive</p>
+    <h1>DMCA Notice <em>Search</em></h1>
+    <p class="stats" id="stats">loading index&hellip;</p>
+  </header>
+
+  <main>
+    <div class="searchbar">
+      <label class="visually-hidden" for="q">Search notices</label>
+      <input id="q" type="search" placeholder="search notices&hellip;" autocomplete="off" spellcheck="false" autofocus>
+      <kbd title="Press / to focus">/</kbd>
+    </div>
+
+    <div class="filters" id="filters">
+      <select id="year" aria-label="Filter by year">
+        <option value="">all years</option>
+      </select>
+      <div class="kinds" role="group" aria-label="Filter by kind">
+        <button data-kind="notice" aria-pressed="true">notice</button>
+        <button data-kind="counternotice" aria-pressed="true">counter</button>
+        <button data-kind="retraction" aria-pressed="true">retraction</button>
+        <button data-kind="reversal" aria-pressed="true">reversal</button>
+      </div>
+    </div>
+
+    <p class="count" id="count" role="status"></p>
+    <ol class="results" id="results"></ol>
+    <button class="more" id="more" hidden>show more</button>
+  </main>
+
+  <footer id="foot">
+    <noscript>This site requires JavaScript to search the index.</noscript>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
