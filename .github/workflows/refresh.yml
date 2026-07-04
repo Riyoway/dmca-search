@@ -1,0 +1,32 @@
+name: refresh
+
+# Re-deploys to Vercel daily so the index picks up new upstream notices.
+# Vercel runs `npm run build` (scripts/build-index.mjs) on each deploy.
+# One-time setup: add a VERCEL_TOKEN repo secret (Vercel dashboard → Account
+# Settings → Tokens). Until then this job succeeds and simply logs a reminder.
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: team_yAGV1sAQ0mmK2c8xkKYIgDbQ
+      VERCEL_PROJECT_ID: prj_DHGbimX5LPGPFshQjoxwtEALQ4xP
+    steps:
+      - id: guard
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            echo "go=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "VERCEL_TOKEN secret not set — add it to enable the daily refresh."
+          fi
+      - if: steps.guard.outputs.go == '1'
+        uses: actions/checkout@v4
+      - if: steps.guard.outputs.go == '1'
+        run: npx vercel@latest deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"

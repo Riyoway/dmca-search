@@ -2,13 +2,14 @@
 
 Client-side search over [github/dmca](https://github.com/github/dmca), GitHub's public archive of DMCA takedown notices.
 
-**Live:** https://riyoway.github.io/dmca-search/
+**Live:** https://dmca-search.riyo.me
 
 ## How it works
 
-- A scheduled GitHub Actions workflow lists every notice in `github/dmca` (blobless clone + `git ls-tree`) and emits a compact JSON index.
+- The build (`scripts/build-index.mjs`) lists every notice in `github/dmca` (blobless clone + `git ls-tree`) and emits a compact JSON index.
 - The site is fully static. Search runs in the browser over that index — no server, no tracking.
-- Each result links to the original notice on GitHub; previews are fetched on demand from `raw.githubusercontent.com`.
+- Each result links to the original notice on GitHub; previews are fetched on demand from `raw.githubusercontent.com`, with `[private]` markers shown as redactions.
+- Hosted on Vercel, which runs the build on every deploy; a daily GitHub Actions job re-deploys so the index stays current.
 
 ## Usage
 
@@ -18,9 +19,11 @@ Results can be filtered by year and by kind: notice, counter notice, retraction,
 ## Development
 
 ```sh
-node scripts/build-index.mjs   # writes site/data/index.json
-npx serve site                 # any static file server works
+npm run build      # writes site/data/index.json
+npx serve site     # any static file server works
 ```
+
+Deploy with `vercel --prod` (build runs on Vercel; no committed index).
 
 ## License
 
