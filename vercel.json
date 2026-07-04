@@ -3,7 +3,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "site",
   "framework": null,
-  "rewrites": [{ "source": "/search", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/search", "destination": "/index.html" },
+    { "source": "/search/", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/data/index.json",
