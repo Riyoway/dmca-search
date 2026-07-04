@@ -14,8 +14,8 @@ jobs:
   redeploy:
     runs-on: ubuntu-latest
     env:
-      VERCEL_ORG_ID: team_yAGV1sAQ0mmK2c8xkKYIgDbQ
-      VERCEL_PROJECT_ID: prj_DHGbimX5LPGPFshQjoxwtEALQ4xP
+      VERCEL_ORG_ID: team_hKzHhtZymhVBxZc5Ryri44OS
+      VERCEL_PROJECT_ID: prj_dnSVhT37C71QYJArQhebcScnjQia
     steps:
       - id: guard
         env:
