@@ -1,0 +1,8 @@
+{
+  "name": "dmca-search",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build-index.mjs"
+  }
+}
