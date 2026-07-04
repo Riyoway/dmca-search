@@ -43,9 +43,7 @@ function parse(path) {
   };
 }
 
-function tokens(query) {
-  return query.toLowerCase().split(/[\s-]+/).filter(Boolean);
-}
+const tokens = (q) => q.toLowerCase().split(/[\s-]+/).filter(Boolean);
 
 function matches() {
   const toks = tokens(state.query);
@@ -57,11 +55,30 @@ function matches() {
   );
 }
 
+/* redacted [private] / [redacted] markers rendered as ink bars */
+function renderDoc(text) {
+  const frag = document.createDocumentFragment();
+  const re = /\[(?:private|redacted)\]/gi;
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) frag.append(text.slice(last, m.index));
+    const bar = document.createElement("span");
+    bar.className = "redact";
+    bar.textContent = m[0];
+    bar.title = "redacted in the public record";
+    frag.append(bar);
+    last = re.lastIndex;
+  }
+  if (last < text.length) frag.append(text.slice(last));
+  return frag;
+}
+
 function rowEl(it) {
   const li = document.createElement("li");
   li.className = "row";
 
   const head = document.createElement("button");
+  head.type = "button";
   head.className = "row-head";
   head.setAttribute("aria-expanded", "false");
   for (const [cls, text] of [
@@ -75,7 +92,6 @@ function rowEl(it) {
     head.append(span);
   }
   head.addEventListener("click", () => togglePreview(li, head, it));
-
   li.append(head);
   return li;
 }
@@ -89,20 +105,41 @@ async function togglePreview(li, head, it) {
   }
   const panel = document.createElement("div");
   panel.className = "preview";
-  panel.innerHTML = `<pre>fetching&hellip;</pre><a target="_blank" rel="noopener">view on GitHub &nearr;</a>`;
-  panel.querySelector("a").href = UPSTREAM + it.path;
+
+  const doc = document.createElement("div");
+  doc.className = "doc loading";
+  doc.textContent = "retrieving from the record…";
+
+  const filed = document.createElement("div");
+  filed.className = "filed";
+  const link = document.createElement("a");
+  link.href = UPSTREAM + it.path;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = "view original ↗";
+  filed.append(`filed ${it.date}`, sep(), KIND_LABEL[it.kind], sep(), link);
+
+  panel.append(doc, filed);
   li.append(panel);
   head.setAttribute("aria-expanded", "true");
 
   if (!state.previews.has(it.path)) {
     try {
       const res = await fetch(RAW + it.path);
-      state.previews.set(it.path, res.ok ? await res.text() : `fetch failed (${res.status})`);
+      state.previews.set(it.path, res.ok ? await res.text() : `Unavailable (HTTP ${res.status}).`);
     } catch {
-      state.previews.set(it.path, "fetch failed — are you offline?");
+      state.previews.set(it.path, "Could not reach the record — are you offline?");
     }
   }
-  panel.querySelector("pre").textContent = state.previews.get(it.path);
+  doc.classList.remove("loading");
+  doc.replaceChildren(renderDoc(state.previews.get(it.path).trim()));
+}
+
+function sep() {
+  const s = document.createElement("span");
+  s.className = "sep";
+  s.textContent = "·";
+  return s;
 }
 
 let firstRender = true;
@@ -116,24 +153,161 @@ function render() {
   const shown = found.slice(0, state.limit);
   shown.forEach((it, i) => {
     const el = rowEl(it);
-    if (firstRender && i < 25) el.style.animationDelay = `${i * 18}ms`;
+    if (firstRender && i < 25) el.style.animationDelay = `${i * 16}ms`;
     list.append(el);
   });
   firstRender = false;
 
+  const total = state.items.length.toLocaleString();
   $("#count").textContent = found.length
-    ? `${found.length.toLocaleString()} of ${state.items.length.toLocaleString()} notices` +
-      (found.length > shown.length ? ` — showing first ${shown.length}` : "")
+    ? `${found.length.toLocaleString()} of ${total} records` +
+      (found.length > shown.length ? ` — disclosing first ${shown.length}` : "")
     : "";
   $("#more").hidden = found.length <= state.limit;
 
   if (!found.length && state.items.length) {
     const li = document.createElement("li");
     li.className = "empty";
-    li.textContent = "Nothing in the record.";
+    li.textContent = "No matching records on file.";
     list.append(li);
   }
 }
+
+/* ------- custom listbox (replaces native <select>) ------- */
+
+function mountSelect({ btn, value, list }, options, onChange) {
+  let active = -1;
+
+  list.replaceChildren();
+  options.forEach((opt, i) => {
+    const li = document.createElement("li");
+    li.id = `opt-${i}`;
+    li.setAttribute("role", "option");
+    li.setAttribute("aria-selected", String(i === 0));
+    const label = document.createElement("span");
+    label.textContent = opt.label;
+    li.append(label);
+    if (opt.tally != null) {
+      const t = document.createElement("span");
+      t.className = "tally";
+      t.textContent = opt.tally.toLocaleString();
+      li.append(t);
+    }
+    li.addEventListener("click", () => choose(i));
+    li.addEventListener("mousemove", () => setActive(i));
+    list.append(li);
+  });
+
+  const items = () => [...list.children];
+  const open = () => btn.getAttribute("aria-expanded") === "true";
+
+  function setActive(i) {
+    items().forEach((el, j) => el.classList.toggle("active", i === j));
+    active = i;
+    if (i >= 0) {
+      list.setAttribute("aria-activedescendant", `opt-${i}`);
+      items()[i].scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function setOpen(v) {
+    btn.setAttribute("aria-expanded", String(v));
+    list.hidden = !v;
+    if (v) {
+      const sel = items().findIndex((el) => el.getAttribute("aria-selected") === "true");
+      setActive(sel < 0 ? 0 : sel);
+      list.focus();
+    } else {
+      btn.focus();
+    }
+  }
+
+  function choose(i) {
+    items().forEach((el, j) => el.setAttribute("aria-selected", String(i === j)));
+    value.textContent = options[i].label;
+    setOpen(false);
+    onChange(options[i].value);
+  }
+
+  btn.addEventListener("click", () => setOpen(!open()));
+
+  btn.addEventListener("keydown", (e) => {
+    if (["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) {
+      e.preventDefault();
+      setOpen(true);
+    }
+  });
+
+  list.addEventListener("keydown", (e) => {
+    const n = items().length;
+    if (e.key === "ArrowDown") { e.preventDefault(); setActive((active + 1) % n); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActive((active - 1 + n) % n); }
+    else if (e.key === "Home") { e.preventDefault(); setActive(0); }
+    else if (e.key === "End") { e.preventDefault(); setActive(n - 1); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (active >= 0) choose(active); }
+    else if (e.key === "Escape" || e.key === "Tab") { setOpen(false); }
+  });
+
+  document.addEventListener("pointerdown", (e) => {
+    if (open() && !btn.parentElement.contains(e.target)) setOpen(false);
+  });
+}
+
+/* ------- custom overlay scrollbar (replaces native window scrollbar) ------- */
+
+function mountScrollbar() {
+  const track = document.createElement("div");
+  track.className = "scroll-track";
+  const thumb = document.createElement("div");
+  thumb.className = "scroll-thumb";
+  track.append(thumb);
+  document.body.append(track);
+
+  const max = () => document.documentElement.scrollHeight - window.innerHeight;
+
+  function update() {
+    const vh = window.innerHeight;
+    const sh = document.documentElement.scrollHeight;
+    if (sh <= vh + 1) { track.style.display = "none"; return; }
+    track.style.display = "block";
+    const h = Math.max(30, (vh / sh) * vh);
+    const top = max() > 0 ? (window.scrollY / max()) * (vh - h) : 0;
+    thumb.style.height = `${h}px`;
+    thumb.style.transform = `translateY(${top}px)`;
+  }
+
+  let startY = 0, startScroll = 0, dragging = false;
+  thumb.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    startY = e.clientY;
+    startScroll = window.scrollY;
+    thumb.setPointerCapture(e.pointerId);
+    document.body.classList.add("scrolling");
+  });
+  thumb.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const trackH = window.innerHeight - thumb.offsetHeight;
+    const ratio = trackH > 0 ? (e.clientY - startY) / trackH : 0;
+    window.scrollTo(0, startScroll + ratio * max());
+  });
+  const stop = () => { dragging = false; document.body.classList.remove("scrolling"); };
+  thumb.addEventListener("pointerup", stop);
+  thumb.addEventListener("pointercancel", stop);
+
+  track.addEventListener("pointerdown", (e) => {
+    if (e.target === thumb) return;
+    const y = e.clientY - thumb.offsetHeight / 2;
+    const trackH = window.innerHeight - thumb.offsetHeight;
+    window.scrollTo({ top: Math.min(1, Math.max(0, y / trackH)) * max(), behavior: "smooth" });
+  });
+
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+  new ResizeObserver(update).observe(document.body);
+  update();
+}
+
+/* ------- wiring ------- */
 
 function wire() {
   let t;
@@ -145,12 +319,7 @@ function wire() {
       render();
     }, 60);
   });
-
-  $("#year").addEventListener("change", (e) => {
-    state.year = e.target.value;
-    state.limit = PAGE;
-    render();
-  });
+  $("#searchbar").addEventListener("submit", (e) => e.preventDefault());
 
   for (const btn of document.querySelectorAll(".kinds button")) {
     btn.addEventListener("click", () => {
@@ -178,21 +347,36 @@ function wire() {
 
 async function main() {
   wire();
+  mountScrollbar();
+
   const res = await fetch("data/index.json");
   if (!res.ok) {
-    $("#stats").textContent = "index unavailable — try again later";
+    $("#stats").textContent = "the register is unavailable — try again later";
     return;
   }
   const index = await res.json();
-
   state.items = index.paths.map(parse).reverse(); // newest first
 
-  const years = [...new Set(state.items.map((it) => it.year))].sort().reverse();
-  $("#year").append(...years.map((y) => new Option(y, y)));
+  const byYear = new Map();
+  for (const it of state.items) byYear.set(it.year, (byYear.get(it.year) || 0) + 1);
+  const years = [...byYear.keys()].sort().reverse();
 
-  const built = index.generated.slice(0, 10);
+  mountSelect(
+    { btn: $("#yearBtn"), value: $("#yearValue"), list: $("#yearList") },
+    [
+      { label: "All years", value: "", tally: state.items.length },
+      ...years.map((y) => ({ label: y, value: y, tally: byYear.get(y) })),
+    ],
+    (year) => {
+      state.year = year;
+      state.limit = PAGE;
+      render();
+    },
+  );
+
   const total = state.items.length.toLocaleString();
-  $("#stats").textContent = `${total} notices · index built ${built}`;
+  const built = index.generated.slice(0, 10);
+  $("#stats").textContent = `${total} notices on record · register updated ${built}`;
   $("#q").placeholder = `search ${total} notices…`;
 
   const foot = $("#foot");
@@ -202,7 +386,7 @@ async function main() {
   const source = document.createElement("a");
   source.href = "https://github.com/Riyoway/dmca-search";
   source.textContent = "source";
-  foot.replaceChildren(`index built ${built} from `, upstream, " · ", source, " · MIT");
+  foot.replaceChildren(`register updated ${built} from `, upstream, " · ", source, " · MIT");
 
   render();
 }

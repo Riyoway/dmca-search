@@ -3,46 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DMCA Notice Search</title>
-  <meta name="description" content="Search GitHub's public archive of DMCA takedown notices, counter notices, retractions and reversals.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='1' y='13' font-size='14' font-family='serif'%3E%C2%A7%3C/text%3E%3C/svg%3E">
+  <title>DMCA Takedown Register — Search</title>
+  <meta name="description" content="Search GitHub's public register of DMCA takedown notices, counter notices, retractions and reversals.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='1' y='13' font-size='13' font-family='Georgia,serif' font-weight='bold' fill='%23a32318'%3E%C2%A7%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="stamp" aria-hidden="true">
+    <span>Public Record</span>
+    <span>§ 512 · DMCA</span>
+  </div>
+
   <header>
-    <p class="kicker">github/dmca &middot; public takedown archive</p>
-    <h1>DMCA Notice <em>Search</em></h1>
-    <p class="stats" id="stats">loading index&hellip;</p>
+    <div class="letterhead">
+      <div class="seal" aria-hidden="true">§512</div>
+      <div class="letterhead-text">
+        <p class="kicker">github/dmca &middot; digital millennium copyright act</p>
+        <h1>Takedown <em>Register</em></h1>
+        <p class="sub">A searchable index of every notice filed to GitHub&rsquo;s public archive.</p>
+      </div>
+    </div>
+    <p class="stats" id="stats">opening the register&hellip;</p>
   </header>
 
   <main>
-    <div class="searchbar">
-      <label class="visually-hidden" for="q">Search notices</label>
-      <input id="q" type="search" placeholder="search notices&hellip;" autocomplete="off" spellcheck="false" autofocus>
-      <kbd title="Press / to focus">/</kbd>
-    </div>
+    <form class="searchbar" id="searchbar" role="search" autocomplete="off">
+      <span class="prompt" aria-hidden="true">re:</span>
+      <label class="visually-hidden" for="q">Search the register</label>
+      <input id="q" type="search" name="q" placeholder="search the register&hellip;" spellcheck="false" autofocus>
+      <kbd title="Press / to search">/</kbd>
+    </form>
 
-    <div class="filters" id="filters">
-      <select id="year" aria-label="Filter by year">
-        <option value="">all years</option>
-      </select>
-      <div class="kinds" role="group" aria-label="Filter by kind">
-        <button data-kind="notice" aria-pressed="true">notice</button>
-        <button data-kind="counternotice" aria-pressed="true">counter</button>
-        <button data-kind="retraction" aria-pressed="true">retraction</button>
-        <button data-kind="reversal" aria-pressed="true">reversal</button>
+    <div class="filters">
+      <div class="field">
+        <span class="field-label">Filed</span>
+        <div class="select" id="yearSelect">
+          <button type="button" class="select-btn" id="yearBtn" aria-haspopup="listbox" aria-expanded="false">
+            <span class="select-value" id="yearValue">All years</span>
+            <span class="select-caret" aria-hidden="true"></span>
+          </button>
+          <ul class="select-list" id="yearList" role="listbox" tabindex="-1" aria-label="Filter by year filed" hidden></ul>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Kind</span>
+        <div class="kinds" role="group" aria-label="Filter by kind">
+          <button type="button" data-kind="notice" aria-pressed="true">notice</button>
+          <button type="button" data-kind="counternotice" aria-pressed="true">counter</button>
+          <button type="button" data-kind="retraction" aria-pressed="true">retraction</button>
+          <button type="button" data-kind="reversal" aria-pressed="true">reversal</button>
+        </div>
       </div>
     </div>
 
+    <div class="ledger-head" aria-hidden="true">
+      <span>Filed</span>
+      <span>Respondent</span>
+      <span>Disposition</span>
+    </div>
     <p class="count" id="count" role="status"></p>
     <ol class="results" id="results"></ol>
-    <button class="more" id="more" hidden>show more</button>
+    <button class="more" id="more" hidden>disclose more records</button>
   </main>
 
   <footer id="foot">
-    <noscript>This site requires JavaScript to search the index.</noscript>
+    <noscript>This register requires JavaScript to search the index.</noscript>
   </footer>
 
   <script src="app.js"></script>
