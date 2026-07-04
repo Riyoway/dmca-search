@@ -1,8 +1,19 @@
-# dmca-search
+<p align="center">
+  <img src="site/icon.png" width="128" alt="dmca-search — a DMCA notice under a magnifying glass">
+</p>
 
-Client-side search over [github/dmca](https://github.com/github/dmca), GitHub's public archive of DMCA takedown notices.
+<h1 align="center">dmca-search</h1>
 
-**Live:** https://dmca-search.riyo.me
+<p align="center">
+  Client-side search over <a href="https://github.com/github/dmca">github/dmca</a>,
+  GitHub's public archive of DMCA takedown notices.
+  <br>
+  <a href="https://dmca-search.riyo.me"><strong>dmca-search.riyo.me</strong></a>
+</p>
+
+![The register: search, year and kind filters over 21k notices](.github/register.png)
+
+![An opened notice, rendered as a handwritten page with pen redactions](.github/notice.png)
 
 ## How it works
 
@@ -14,7 +25,9 @@ Client-side search over [github/dmca](https://github.com/github/dmca), GitHub's 
 ## Usage
 
 Type to search notice names (`nintendo`, `youtube-dl`, …). Multiple terms are ANDed.
-Results can be filtered by year and by kind: notice, counter notice, retraction, reversal.
+Results can be filtered by year and by kind (notice, counter notice, retraction, reversal), laid out as a list or a card grid.
+
+Opened notices render their markdown on a textured paper page. The typeface (script / type / serif) and the notation (hand-drawn / print) are switchable; choices persist in the browser. `[private]` markers appear as pen scribbles — hover to peek.
 
 ## Development
 
