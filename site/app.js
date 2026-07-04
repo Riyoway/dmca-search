@@ -431,6 +431,30 @@ function mountScrollbar() {
   update();
 }
 
+/* ------- shareable search URLs (?q=…, also accepts /search?=term or ?term) ------- */
+
+function readQuery() {
+  const p = new URLSearchParams(location.search);
+  if (p.has("q")) return p.get("q") || "";
+  for (const [k, v] of p) {
+    if (v) return v; // ?=nintendo
+    if (k) return k; // ?nintendo
+  }
+  return "";
+}
+
+function writeQuery(term) {
+  const url = location.pathname + (term ? `?q=${encodeURIComponent(term)}` : "");
+  history.replaceState(null, "", url);
+}
+
+function applyQuery(term) {
+  $("#q").value = term;
+  state.query = term;
+  state.limit = PAGE;
+  render();
+}
+
 /* ------- wiring ------- */
 
 function wire() {
@@ -440,10 +464,13 @@ function wire() {
     t = setTimeout(() => {
       state.query = e.target.value;
       state.limit = PAGE;
+      writeQuery(e.target.value);
       render();
     }, 60);
   });
   $("#searchbar").addEventListener("submit", (e) => e.preventDefault());
+
+  addEventListener("popstate", () => applyQuery(readQuery()));
 
   for (const btn of document.querySelectorAll(".kinds button")) {
     btn.addEventListener("click", () => {
@@ -515,6 +542,12 @@ async function main() {
       render();
     },
   );
+
+  const q0 = readQuery();
+  if (q0) {
+    $("#q").value = q0;
+    state.query = q0;
+  }
 
   const total = state.items.length.toLocaleString();
   const built = index.generated.slice(0, 10);
