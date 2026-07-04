@@ -55,22 +55,136 @@ function matches() {
   );
 }
 
-/* redacted [private] / [redacted] markers rendered as ink bars */
-function renderDoc(text) {
-  const frag = document.createDocumentFragment();
-  const re = /\[(?:private|redacted)\]/gi;
+/* ---- markdown → DOM (built node-by-node, so untrusted text can't inject HTML) ---- */
+
+const SAFE_URL = /^(https?:|mailto:)/i;
+// Source only — inline() compiles a fresh regex per call so recursion
+// (bold/italic/link contents) can't clobber a shared lastIndex.
+const INLINE_SRC = "(`[^`]+`)|(\\*\\*[\\s\\S]+?\\*\\*)|(\\*[^*\\n]+?\\*)|(!?\\[[^\\]]*\\]\\([^)\\s]+\\))|(\\bhttps?:\\/\\/[^\\s<>()]+)|(\\[(?:private|redacted)\\])";
+
+function redaction(token) {
+  const s = document.createElement("span");
+  s.className = "redact";
+  s.textContent = token;
+  s.title = "redacted in the public record";
+  return s;
+}
+
+function link(url, label) {
+  if (!SAFE_URL.test(url)) return document.createTextNode(label);
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.rel = "noopener nofollow";
+  if (typeof label === "string") a.textContent = label;
+  else inline(label, a);
+  return a;
+}
+
+function inline(text, parent) {
+  const re = new RegExp(INLINE_SRC, "gi");
   let last = 0, m;
   while ((m = re.exec(text))) {
-    if (m.index > last) frag.append(text.slice(last, m.index));
-    const bar = document.createElement("span");
-    bar.className = "redact";
-    bar.textContent = m[0];
-    bar.title = "redacted in the public record";
-    frag.append(bar);
+    if (m.index > last) parent.append(text.slice(last, m.index));
+    if (m[1]) {
+      const c = document.createElement("code");
+      c.textContent = m[1].slice(1, -1);
+      parent.append(c);
+    } else if (m[2]) {
+      const b = document.createElement("strong");
+      inline(m[2].slice(2, -2), b);
+      parent.append(b);
+    } else if (m[3]) {
+      const i = document.createElement("em");
+      inline(m[3].slice(1, -1), i);
+      parent.append(i);
+    } else if (m[4]) {
+      const mm = m[4].match(/^!?\[([^\]]*)\]\(([^)\s]+)\)$/);
+      parent.append(link(mm[2], mm[1] || mm[2]));
+    } else if (m[5]) {
+      const trail = (m[5].match(/[.,;:!?]+$/) || [""])[0];
+      const url = m[5].slice(0, m[5].length - trail.length);
+      parent.append(link(url, url));
+      if (trail) parent.append(trail);
+    } else if (m[6]) {
+      parent.append(redaction(m[6]));
+    }
     last = re.lastIndex;
   }
-  if (last < text.length) frag.append(text.slice(last));
-  return frag;
+  if (last < text.length) parent.append(text.slice(last));
+}
+
+function renderDoc(src) {
+  const root = document.createDocumentFragment();
+  const lines = src.replace(/\r\n?/g, "\n").split("\n");
+  let para = [];
+  let i = 0;
+
+  const flush = () => {
+    if (!para.length) return;
+    const p = document.createElement("p");
+    para.forEach((ln, k) => {
+      if (k) p.append(document.createElement("br"));
+      inline(ln, p);
+    });
+    root.append(p);
+    para = [];
+  };
+
+  while (i < lines.length) {
+    const line = lines[i];
+    let m;
+
+    if (/^```/.test(line)) {
+      flush();
+      const buf = [];
+      for (i++; i < lines.length && !/^```/.test(lines[i]); i++) buf.push(lines[i]);
+      i++;
+      const pre = document.createElement("pre");
+      const code = document.createElement("code");
+      code.textContent = buf.join("\n");
+      pre.append(code);
+      root.append(pre);
+    } else if (/^\s*$/.test(line)) {
+      flush();
+      i++;
+    } else if ((m = line.match(/^(#{1,6})\s+(.*)$/))) {
+      flush();
+      const h = document.createElement(`h${m[1].length}`);
+      inline(m[2].trim(), h);
+      root.append(h);
+      i++;
+    } else if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)) {
+      flush();
+      root.append(document.createElement("hr"));
+      i++;
+    } else if (/^\s*>\s?/.test(line)) {
+      flush();
+      const bq = document.createElement("blockquote");
+      let first = true;
+      for (; i < lines.length && /^\s*>\s?/.test(lines[i]); i++) {
+        if (!first) bq.append(document.createElement("br"));
+        inline(lines[i].replace(/^\s*>\s?/, ""), bq);
+        first = false;
+      }
+      root.append(bq);
+    } else if (/^\s*([-*+]|\d+[.)])\s+/.test(line)) {
+      flush();
+      const ordered = /^\s*\d+[.)]\s+/.test(line);
+      const list = document.createElement(ordered ? "ol" : "ul");
+      for (; i < lines.length && /^\s*([-*+]|\d+[.)])\s+/.test(lines[i]); i++) {
+        const li = document.createElement("li");
+        inline(lines[i].replace(/^\s*([-*+]|\d+[.)])\s+/, ""), li);
+        list.append(li);
+      }
+      root.append(list);
+    } else {
+      para.push(line);
+      i++;
+    }
+  }
+  flush();
+  return root;
 }
 
 function rowEl(it) {
@@ -106,6 +220,16 @@ async function togglePreview(li, head, it) {
   const panel = document.createElement("div");
   panel.className = "preview";
 
+  const pageHead = document.createElement("div");
+  pageHead.className = "page-head";
+  const ornament = document.createElement("span");
+  ornament.className = "ornament";
+  ornament.textContent = "❦";
+  const title = document.createElement("span");
+  title.className = "page-title";
+  title.textContent = it.name;
+  pageHead.append(ornament, title);
+
   const doc = document.createElement("div");
   doc.className = "doc loading";
   doc.textContent = "retrieving from the record…";
@@ -119,7 +243,7 @@ async function togglePreview(li, head, it) {
   link.textContent = "view original ↗";
   filed.append(`filed ${it.date}`, sep(), KIND_LABEL[it.kind], sep(), link);
 
-  panel.append(doc, filed);
+  panel.append(pageHead, doc, filed);
   li.append(panel);
   head.setAttribute("aria-expanded", "true");
 
@@ -330,6 +454,24 @@ function wire() {
       state.limit = PAGE;
       render();
     });
+  }
+
+  // chip groups that flip an <html data-*> attribute and persist
+  for (const [sel, attr, key] of [
+    [".fonts", "doc", "docFont"],
+    [".marks", "md", "docMarks"],
+    [".views", "view", "docView"],
+  ]) {
+    const btns = [...document.querySelectorAll(`${sel} button`)];
+    const set = (v) => {
+      document.documentElement.dataset[attr] = v;
+      for (const b of btns) b.setAttribute("aria-pressed", String(b.dataset.val === v));
+      try { localStorage.setItem(key, v); } catch {}
+    };
+    for (const b of btns) b.addEventListener("click", () => set(b.dataset.val));
+    let saved;
+    try { saved = localStorage.getItem(key); } catch {}
+    if (saved && btns.some((b) => b.dataset.val === saved)) set(saved);
   }
 
   $("#more").addEventListener("click", () => {

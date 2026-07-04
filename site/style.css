@@ -10,10 +10,31 @@
   --stamp-ink: #a32318;
   --wash: #e9e1cd;
   --field: #fbf8f0;
+  --sheet: #fbf9f1;
+  --rule-line: rgba(120, 110, 88, 0.2);
   --serif: "Instrument Serif", "Times New Roman", Georgia, serif;
   --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --script: "Caveat", "Segoe Script", cursive;
   --shadow: 0 1px 0 rgba(33, 29, 23, 0.04);
+
+  /* notice typeface — switched via <html data-doc>; default is script */
+  --doc-font: var(--script);
+  --doc-size: 1.42rem;
+  --doc-line: 2rem;
+
+  /* pen & paper assets */
+  --hl: rgba(255, 199, 0, 0.32);
+  --squiggle: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='6'><path d='M0 3 Q6 0 12 3 T24 3' fill='none' stroke='%23a32318' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --squiggle-v: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='24'><path d='M3 0 Q0 6 3 12 T3 24' fill='none' stroke='%23a32318' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --scribble: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none'><g fill='none' stroke='%23262019' stroke-width='4.6' stroke-linecap='round'><path d='M2 12C15 4 25 20 38 10S62 18 75 8 92 16 98 10'/><path d='M3 8C18 16 30 2 45 14S70 4 84 14 95 6 98 14'/><path d='M2 16C14 8 28 18 42 8S66 16 80 6 94 18 98 8'/><path d='M4 5C20 12 36 5 52 12S76 6 97 13'/><path d='M3 19C22 12 40 20 58 12S82 20 97 14'/></g></svg>");
+  --paper-grain: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.055 0'/></filter><rect width='260' height='260' filter='url(%23g)'/></svg>");
+  --paper-mottle: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.42 0 0 0 0 0.33 0 0 0 0 0.18 0 0 0 0.10 0'/></filter><rect width='420' height='420' filter='url(%23m)'/></svg>");
+  --sheet-shadow: 0 1px 2px rgba(35, 28, 16, 0.22), 0 16px 32px -18px rgba(35, 28, 16, 0.5);
 }
+
+:root[data-doc="type"] { --doc-font: var(--mono); --doc-size: 0.82rem; }
+:root[data-doc="serif"] { --doc-font: var(--serif); --doc-size: 1.12rem; }
+:root[data-doc="script"] { --doc-font: var(--script); --doc-size: 1.42rem; }
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -28,7 +49,16 @@
     --stamp-ink: #e2685a;
     --wash: #221d15;
     --field: #1b1710;
+    --sheet: #1c1811;
+    --rule-line: rgba(150, 140, 115, 0.16);
     --shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+
+    --hl: rgba(255, 199, 0, 0.17);
+    --squiggle: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='6'><path d='M0 3 Q6 0 12 3 T24 3' fill='none' stroke='%23dd5647' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    --squiggle-v: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='24'><path d='M3 0 Q0 6 3 12 T3 24' fill='none' stroke='%23dd5647' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    --scribble: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none'><g fill='none' stroke='%23cfc4ac' stroke-width='4.6' stroke-linecap='round'><path d='M2 12C15 4 25 20 38 10S62 18 75 8 92 16 98 10'/><path d='M3 8C18 16 30 2 45 14S70 4 84 14 95 6 98 14'/><path d='M2 16C14 8 28 18 42 8S66 16 80 6 94 18 98 8'/><path d='M4 5C20 12 36 5 52 12S76 6 97 13'/><path d='M3 19C22 12 40 20 58 12S82 20 97 14'/></g></svg>");
+    --paper-mottle: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/></filter><rect width='420' height='420' filter='url(%23m)'/></svg>");
+    --sheet-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 32px -16px rgba(0, 0, 0, 0.85);
   }
 }
 
@@ -304,9 +334,9 @@ h1 em { font-style: italic; color: var(--stamp-ink); }
 
 /* kind toggles — stamped chips */
 
-.kinds { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.kinds, .fonts, .marks, .views { display: flex; gap: 0.35rem; flex-wrap: wrap; }
 
-.kinds button {
+.kinds button, .fonts button, .marks button, .views button {
   padding: 0.35rem 0.7rem;
   border: 1px solid var(--rule);
   border-radius: 2px;
@@ -320,13 +350,22 @@ h1 em { font-style: italic; color: var(--stamp-ink); }
   transition: color 0.12s, border-color 0.12s, background 0.12s;
 }
 
-.kinds button[aria-pressed="true"] {
+.kinds button[aria-pressed="true"],
+.fonts button[aria-pressed="true"],
+.marks button[aria-pressed="true"],
+.views button[aria-pressed="true"] {
   color: var(--ink);
   border-color: var(--ink);
   background: var(--wash);
 }
 
-.kinds button:focus-visible { outline: 2px solid var(--stamp); outline-offset: 1px; }
+.kinds button:focus-visible,
+.fonts button:focus-visible,
+.marks button:focus-visible,
+.views button:focus-visible {
+  outline: 2px solid var(--stamp);
+  outline-offset: 1px;
+}
 
 /* ---------- ledger ---------- */
 
@@ -413,44 +452,266 @@ h1 em { font-style: italic; color: var(--stamp-ink); }
 
 /* opened notice */
 
+/* opened notice — a pocket-paperback page laid on the desk */
 .preview {
-  margin: 0 0.25rem 1rem;
-  border-left: 3px solid var(--stamp);
-  padding: 1rem 1.15rem 1.1rem;
-  background: var(--paper-2);
-  box-shadow: inset 0 1px 0 rgba(33, 29, 23, 0.04);
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 38rem);
+  margin: 0.7rem auto 1.7rem;
+  padding: 2.1rem 2.5rem 1.5rem;
+  transform: rotate(-0.35deg);
+}
+
+/* the paper itself: grain + age mottle + vignette, edges roughened by SVG displacement */
+.preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    var(--paper-grain),
+    var(--paper-mottle),
+    radial-gradient(ellipse at 28% 18%, rgba(255, 255, 255, 0.35), transparent 55%),
+    linear-gradient(112deg, rgba(122, 100, 58, 0.07), transparent 38%, rgba(96, 74, 40, 0.12)),
+    var(--sheet);
+  box-shadow:
+    var(--sheet-shadow),
+    inset 0 0 2.5rem rgba(96, 74, 40, 0.09);
+  filter: url(#roughen);
+}
+
+@media (prefers-color-scheme: dark) {
+  .preview::before {
+    background:
+      var(--paper-grain),
+      var(--paper-mottle),
+      radial-gradient(ellipse at 28% 18%, rgba(255, 244, 214, 0.03), transparent 55%),
+      linear-gradient(112deg, rgba(0, 0, 0, 0.25), transparent 38%, rgba(0, 0, 0, 0.35)),
+      var(--sheet);
+  }
+}
+
+/* chapter head */
+.preview .page-head {
+  text-align: center;
+  margin-bottom: calc(var(--doc-line) * 0.8);
+}
+
+.preview .page-head .ornament {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--stamp-ink);
+  font-family: var(--serif);
+  font-size: 1.05rem;
+}
+
+.preview .page-head .page-title {
+  font-family: var(--doc-font);
+  font-size: calc(var(--doc-size) * 1.3);
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .preview .doc {
-  margin: 0 0 0.9rem;
+  font-family: var(--doc-font);
+  font-size: var(--doc-size);
+  line-height: var(--doc-line);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+/* faint notebook ruling only under the handwritten hand */
+:root[data-doc="script"] .preview .doc:not(.loading) {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--doc-line) - 1px),
+    var(--rule-line) calc(var(--doc-line) - 1px),
+    var(--rule-line) var(--doc-line)
+  );
+  background-position: 0 0.55rem;
+}
+
+/* typeset hands read like a set book page */
+:root:not([data-doc="script"]) .preview .doc p {
+  text-align: justify;
+  hyphens: auto;
+}
+
+.preview .doc.loading {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* markdown inside the sheet — kept on the ruling by using line-height multiples */
+.doc p,
+.doc ul,
+.doc ol,
+.doc blockquote,
+.doc pre { margin: 0 0 var(--doc-line); }
+.doc > :last-child { margin-bottom: 0; }
+
+.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
+  font-family: var(--doc-font);
+  font-weight: 600;
+  line-height: var(--doc-line);
+  margin: var(--doc-line) 0 0;
+  color: var(--ink);
+}
+.doc h1 { font-size: 1.5em; }
+.doc h2 { font-size: 1.3em; }
+.doc h3 { font-size: 1.15em; }
+.doc h4, .doc h5, .doc h6 { font-size: 1em; letter-spacing: 0.02em; }
+
+.doc a {
+  color: var(--stamp-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.doc strong { font-weight: 700; }
+.doc em { font-style: italic; }
+
+.doc code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  background: var(--wash);
+  padding: 0.05em 0.3em;
+  border-radius: 2px;
+}
+
+.doc pre {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: 0.8rem;
-  line-height: 1.75;
+  background: var(--wash);
+  padding: 0.7rem 0.9rem;
+  border-radius: 2px;
+}
+.doc pre code { background: none; padding: 0; font-size: inherit; }
+
+.doc blockquote {
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--faint);
   color: var(--ink-soft);
 }
 
-.preview .doc.loading { font-style: italic; color: var(--muted); }
+.doc ul, .doc ol { padding-left: 1.7rem; }
 
-/* redacted spans — the DMCA [private] motif */
-.redact {
-  background: var(--ink);
-  color: transparent;
-  border-radius: 1px;
-  padding: 0 0.15em;
-  cursor: help;
-  transition: color 0.12s, background 0.12s;
+.doc hr {
+  border: 0;
+  border-top: 1px dashed var(--muted);
+  margin: var(--doc-line) 0;
 }
-.redact:hover { background: var(--wash); color: var(--stamp-ink); }
 
+/* ---------- hand-drawn markdown (data-md="hand") ---------- */
+
+:root[data-md="hand"] .doc h1,
+:root[data-md="hand"] .doc h2,
+:root[data-md="hand"] .doc h3,
+:root[data-md="hand"] .doc h4,
+:root[data-md="hand"] .doc h5,
+:root[data-md="hand"] .doc h6 {
+  padding-bottom: 0.22em;
+  background: var(--squiggle) repeat-x left bottom;
+}
+
+:root[data-md="hand"] .doc strong {
+  font-weight: 600;
+  background: linear-gradient(transparent 50%, var(--hl) 50%, var(--hl) 92%, transparent 92%);
+  padding: 0 0.1em;
+}
+
+:root[data-md="hand"] .doc em {
+  background: var(--squiggle) repeat-x left bottom;
+  padding-bottom: 3px;
+}
+
+:root[data-md="hand"] .doc a {
+  text-decoration: none;
+  background: var(--squiggle) repeat-x left bottom;
+  padding-bottom: 2px;
+}
+
+:root[data-md="hand"] .doc blockquote {
+  border-left: 0;
+  padding-left: 1.05rem;
+  background: var(--squiggle-v) repeat-y left top;
+}
+
+:root[data-md="hand"] .doc hr {
+  border: 0;
+  height: 6px;
+  background: var(--squiggle) repeat-x center;
+}
+
+:root[data-md="hand"] .doc ul {
+  list-style: none;
+  padding-left: 1.5rem;
+}
+
+:root[data-md="hand"] .doc ul li::before {
+  content: "—";
+  display: inline-block;
+  width: 1.5rem;
+  margin-left: -1.5rem;
+  color: var(--stamp-ink);
+}
+
+:root[data-md="hand"] .doc code {
+  background: transparent;
+  border-bottom: 1px dashed var(--faint);
+  border-radius: 0;
+  padding: 0 0.15em 1px;
+}
+
+:root[data-md="hand"] .doc pre {
+  background: transparent;
+  border: 1px dashed var(--faint);
+  border-radius: 0;
+}
+
+:root[data-md="hand"] .doc pre code { border-bottom: 0; }
+
+/* redacted spans — struck out by hand with a pen */
+.redact {
+  position: relative;
+  color: transparent;
+  padding: 0 0.2em;
+  cursor: help;
+  transition: color 0.15s;
+}
+
+.redact::after {
+  content: "";
+  position: absolute;
+  inset: 0.02em -0.12em -0.02em;
+  background: var(--scribble);
+  background-size: 100% 100%;
+  transform: rotate(-0.8deg);
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.redact:hover { color: var(--stamp-ink); }
+.redact:hover::after { opacity: 0.14; }
+
+/* folio line, like a colophon at the foot of the page */
 .preview .filed {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1rem;
-  padding-top: 0.7rem;
-  border-top: 1px solid var(--rule);
-  font-size: 0.68rem;
-  letter-spacing: 0.03em;
+  justify-content: center;
+  gap: 0.3rem 0.85rem;
+  margin-top: calc(var(--doc-line) * 0.85);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
   color: var(--muted);
 }
 
@@ -550,3 +811,49 @@ body.scrolling .scroll-thumb { cursor: grabbing; }
   .row-head { grid-template-columns: 1fr 5.5rem; }
   .row .date { grid-column: 1 / -1; }
 }
+
+/* ---------- grid view — a drawer of catalogue cards ---------- */
+
+:root[data-view="grid"] .ledger-head { display: none; }
+
+:root[data-view="grid"] .results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.6rem;
+}
+
+:root[data-view="grid"] .row {
+  border: 1px solid var(--rule);
+  background: var(--field);
+  box-shadow: var(--shadow);
+  transition: border-color 0.12s;
+}
+
+:root[data-view="grid"] .row:hover { border-color: var(--ink); }
+
+:root[data-view="grid"] .row-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  height: 100%;
+  padding: 0.85rem 0.95rem 0.8rem;
+}
+
+:root[data-view="grid"] .row .name { font-size: 1.28rem; }
+:root[data-view="grid"] .row .kind { margin-top: auto; }
+
+/* an opened card takes the whole shelf so the page can breathe */
+:root[data-view="grid"] .row:has(.preview) { grid-column: 1 / -1; }
+
+:root[data-view="grid"] .row:has(.preview) .row-head {
+  flex-direction: row;
+  align-items: baseline;
+  height: auto;
+}
+
+:root[data-view="grid"] .row:has(.preview) .kind { margin: 0 0 0 auto; }
+
+:root[data-view="grid"] .empty,
+:root[data-view="grid"] .results .row + .empty { grid-column: 1 / -1; }
